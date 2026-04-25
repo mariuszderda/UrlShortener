@@ -1,6 +1,6 @@
 # URL Shortener
 
-Projekt zaliczeniowy — skracanie URLi w Spring Boot. Dwa mikroserwisy + PostgreSQL w Dockerze.
+Laboratorium 2 — skracanie URLi w Spring Boot. Dwa mikroserwisy + PostgreSQL w Dockerze.
 
 ## Co to robi
 
