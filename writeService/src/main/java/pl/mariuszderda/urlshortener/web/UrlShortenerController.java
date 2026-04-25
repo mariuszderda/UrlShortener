@@ -9,21 +9,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.mariuszderda.urlshortener.dto.ShortenRequest;
 import pl.mariuszderda.urlshortener.dto.ShortenResponse;
-import pl.mariuszderda.urlshortener.service.UrlShortenerService;
+import pl.mariuszderda.urlshortener.service.UrlWriteService;
 
 @RestController
 @RequestMapping("/api")
 public class UrlShortenerController {
-    private final UrlShortenerService urlShortenerService;
+    private final UrlWriteService urlShortenerService;
 
-    public UrlShortenerController(UrlShortenerService urlShortenerService) {
+    public UrlShortenerController(UrlWriteService urlShortenerService) {
         this.urlShortenerService = urlShortenerService;
     }
 
     @PostMapping("shorten")
     ResponseEntity<ShortenResponse> createShorten (@RequestBody ShortenRequest request){
         var shortenUrl = urlShortenerService.shorten(request.url());
-        var responseUrl = shortenUrl.shortCode();
+        var responseUrl = shortenUrl.getShortCode();
         var response = new ShortenResponse("http://localhost:8080/" + responseUrl);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

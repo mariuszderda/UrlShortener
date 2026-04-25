@@ -10,9 +10,7 @@ import pl.mariuszderda.urlshortener.exception.UrlExpiredException;
 import pl.mariuszderda.urlshortener.exception.UrlNotFoundException;
 import pl.mariuszderda.urlshortener.model.ShortenedUrl;
 import pl.mariuszderda.urlshortener.repository.UrlRepository;
-import pl.mariuszderda.urlshortener.util.Base62Encoder;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -27,54 +25,11 @@ class UrlShortenerServiceTest {
     @Mock
     private UrlRepository urlRepository;
 
-    @Mock
-    private Base62Encoder base62Encoder;
-
-    private UrlShortenerService urlShortenerService;
+    private UrlReadService urlShortenerService;
 
     @BeforeEach
     void setup() {
-        urlShortenerService = new UrlShortenerService(urlRepository, base62Encoder, 60);
-    }
-
-    @Test
-    void shouldShortenUrl() {
-        // given
-        when(base62Encoder.encode(0L)).thenReturn("0");
-
-        // when
-        ShortenedUrl result = urlShortenerService.shorten("https://example.com");
-
-        // then
-        Assertions.assertEquals("0", result.shortCode());
-        Assertions.assertEquals("https://example.com", result.originalUrl());
-        verify(urlRepository).save(any(ShortenedUrl.class));
-    }
-
-    @Test
-    void shouldReturnOriginalUrlWithHttps() {
-        // given
-        when(base62Encoder.encode(0L)).thenReturn("0");
-
-        // when
-        ShortenedUrl result = urlShortenerService.shorten("example.com");
-
-        // then
-        assertTrue(result.originalUrl().startsWith("https://"));
-    }
-
-    @Test
-    void shouldReturnOriginalUrl() {
-        // given
-        when(base62Encoder.encode(0L)).thenReturn("0");
-
-        // when
-        ShortenedUrl result = urlShortenerService.shorten("example.com");
-        Duration timeExpire = Duration.between(result.createdAt(), result.expiresAt());
-        long minutes = timeExpire.toMinutes();
-        // then
-        Assertions.assertEquals(60, minutes);
-        Assertions.assertEquals("https://example.com", result.originalUrl());
+        urlShortenerService = new UrlReadService(urlRepository);
     }
 
     @Test

@@ -1,10 +1,9 @@
 package pl.mariuszderda.urlshortener.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import pl.mariuszderda.urlshortener.model.ShortenedUrl;
 
 import java.util.Optional;
 
-public interface UrlRepository {
-    void save(ShortenedUrl url);
-    Optional<ShortenedUrl> findByShortCode(String code);
+public interface UrlRepository extends JpaRepository<ShortenedUrl, String> {
 }

@@ -4,14 +4,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import pl.mariuszderda.urlshortener.service.UrlShortenerService;
+import pl.mariuszderda.urlshortener.service.UrlReadService;
 
 @Controller
 public class UrlRedirectController {
 
-    private final UrlShortenerService urlShortenerService;
+    private final UrlReadService urlShortenerService;
 
-    public UrlRedirectController(UrlShortenerService urlShortenerService) {
+    public UrlRedirectController(UrlReadService urlShortenerService) {
         this.urlShortenerService = urlShortenerService;
     }
 
