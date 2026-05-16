@@ -24,7 +24,7 @@ public class UrlShortenerController {
     ResponseEntity<ShortenResponse> createShorten (@RequestBody ShortenRequest request){
         var shortenUrl = urlShortenerService.shorten(request.url());
         var responseUrl = shortenUrl.getShortCode();
-        var response = new ShortenResponse("http://localhost:8080/" + responseUrl);
+        var response = new ShortenResponse("http://localhost:8082/" + responseUrl);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
