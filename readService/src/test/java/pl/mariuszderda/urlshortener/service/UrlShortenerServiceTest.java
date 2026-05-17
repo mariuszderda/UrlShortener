@@ -46,7 +46,7 @@ class UrlShortenerServiceTest {
                 LocalDateTime.now().minusHours(2),
                 LocalDateTime.now().minusHours(1)
         );
-        when(urlRepository.findByShortCode("sbc")).thenReturn(Optional.of(expiredUrl));
+        when(urlRepository.findById("sbc")).thenReturn(Optional.of(expiredUrl));
 
         // when & then
         Assertions.assertThrows(UrlExpiredException.class, () -> urlShortenerService.resolve("sbc"));

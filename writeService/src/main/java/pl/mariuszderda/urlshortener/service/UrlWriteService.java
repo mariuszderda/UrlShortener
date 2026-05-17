@@ -32,9 +32,9 @@ public class UrlWriteService {
             originalUrl = "https://" + originalUrl;
         }
         long id = counter.getAndIncrement();
-        var shortCode = base62Encoder.encode(id);
+        var shortcode = base62Encoder.encode(id);
         var shortUrl = new ShortenedUrl(
-                shortCode,
+                shortcode,
                 originalUrl,
                 now(),
                 now().plusMinutes(ttlMinutes)

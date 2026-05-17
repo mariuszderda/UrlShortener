@@ -19,7 +19,7 @@ public class UrlReadService {
     }
 
     public String resolve (String shortCode){
-        var originalUrl = urlRepository.findByShortCode(shortCode);
+        var originalUrl = urlRepository.findById(shortCode);
         if (originalUrl.isEmpty()){
             throw new UrlNotFoundException("Url not found.");
         }

@@ -1,46 +1,130 @@
 services:
 
-  db:
-    image: postgres:latest
-    restart: always
-    container_name: url-shortener-database
-    environment:
-      POSTGRES_DB: urlshortener
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: example_password
-    volumes:
-      - pgdata:/var/lib/postgresql
+  cassandra-1:
+    image: "cassandra:latest"  # cassandra:4.1.3
+    container_name: "cassandra-1"
     ports:
-      - 5432:5432
+      - 7000:7000
+      - 9042:9042
+    networks:
+      - cassandra-net
+    environment:
+      - CASSANDRA_START_RPC=true       # default
+      - CASSANDRA_RPC_ADDRESS=0.0.0.0  # default
+      - CASSANDRA_LISTEN_ADDRESS=auto  # default, use IP addr of container # = CASSANDRA_BROADCAST_ADDRESS
+      - CASSANDRA_CLUSTER_NAME=my-cluster
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_DC=my-datacenter-1
+      - CASSANDRA_SEEDS=cassandra-1
+      - MAX_HEAP_SIZE=2G
+      - HEAP_NEWSIZE=512M
+    volumes:
+      - cassandra-node-1:/var/lib/cassandra:rw
+    restart:
+      on-failure
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 5s
-      timeout: 5s
+      test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces' || exit 1"]
+      interval: 30s
+      start_period: 2m
+      timeout: 10s
+      retries: 5
+
+  cassandra-2:
+    image: "cassandra:latest"  # cassandra:4.1.3
+    container_name: "cassandra-2"
+    ports:
+      - 9043:9042
+    networks:
+      - cassandra-net
+    environment:
+      - CASSANDRA_START_RPC=true       # default
+      - CASSANDRA_RPC_ADDRESS=0.0.0.0  # default
+      - CASSANDRA_LISTEN_ADDRESS=auto  # default, use IP addr of container # = CASSANDRA_BROADCAST_ADDRESS
+      - CASSANDRA_CLUSTER_NAME=my-cluster
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_DC=my-datacenter-1
+      - CASSANDRA_SEEDS=cassandra-1
+      - MAX_HEAP_SIZE=2G
+      - HEAP_NEWSIZE=512M
+    depends_on:
+      cassandra-1:
+        condition: service_healthy
+    volumes:
+      - cassandra-node-2:/var/lib/cassandra:rw
+    restart:
+      on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces' || exit 1"]
+      interval: 30s
+      start_period: 2m
+      timeout: 10s
+      retries: 5
+
+  cassandra-3:
+    image: "cassandra:latest"  # cassandra:4.1.3
+    container_name: "cassandra-3"
+    ports:
+      - 9044:9042
+    networks:
+      - cassandra-net
+    environment:
+      - CASSANDRA_START_RPC=true       # default
+      - CASSANDRA_RPC_ADDRESS=0.0.0.0  # default
+      - CASSANDRA_LISTEN_ADDRESS=auto  # default, use IP addr of container # = CASSANDRA_BROADCAST_ADDRESS
+      - CASSANDRA_CLUSTER_NAME=my-cluster
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_DC=my-datacenter-1
+      - CASSANDRA_SEEDS=cassandra-1
+      - MAX_HEAP_SIZE=2G
+      - HEAP_NEWSIZE=512M
+    depends_on:
+      cassandra-2:
+        condition: service_healthy
+    volumes:
+      - cassandra-node-3:/var/lib/cassandra:rw
+    restart:
+      on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces' || exit 1"]
+      interval: 30s
+      start_period: 2m
+      timeout: 10s
       retries: 5
 
   read-service:
     build: ./readService/
     ports:
       - 8082:8082
+    networks:
+      - cassandra-net
     depends_on:
-      db:
+      cassandra-3:
         condition: service_healthy
     environment:
-      DB_URL: jdbc:postgresql://db:5432/urlshortener
-      DB_USERNAME: postgres
-      DB_PASSWORD: example_password
+      - CASSANDRA_CONTACT_POINTS=cassandra-1
+      - CASSANDRA_PORT=9042
+      - CASSANDRA_DATACENTER=my-datacenter-1
+      - CASSANDRA_KEYSPACE=urlshortener
 
   write-service:
     build: ./writeService/
     ports:
       - 8081:8081
+    networks:
+      - cassandra-net
     depends_on:
-      db:
+      cassandra-3:
         condition: service_healthy
     environment:
-      DB_URL: jdbc:postgresql://db:5432/urlshortener
-      DB_USERNAME: postgres
-      DB_PASSWORD: example_password
+      - CASSANDRA_CONTACT_POINTS=cassandra-1
+      - CASSANDRA_PORT=9042
+      - CASSANDRA_DATACENTER=my-datacenter-1
+      - CASSANDRA_KEYSPACE=urlshortener
+
+networks:
+  cassandra-net:
 
 volumes:
-  pgdata:
+  cassandra-node-1:
+  cassandra-node-2:
+  cassandra-node-3:

@@ -1,14 +1,17 @@
 package pl.mariuszderda.urlshortener.model;
 
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.cassandra.core.mapping.Column;
+import org.springframework.data.cassandra.core.mapping.PrimaryKey;
+import org.springframework.data.cassandra.core.mapping.Table;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "url_shorten")
+@Table("urlshorten")
 public class ShortenedUrl{
-        @Id String shortCode;
+        @PrimaryKey
+        String shortcode;
         @Column
         String originalUrl;
         @Column
@@ -19,15 +22,15 @@ public class ShortenedUrl{
     protected ShortenedUrl() {
     }
 
-    public ShortenedUrl(String shortCode, String originalUrl, LocalDateTime createdAt, LocalDateTime expiresAt) {
-        this.shortCode = shortCode;
+    public ShortenedUrl(String shortcode, String originalUrl, LocalDateTime createdAt, LocalDateTime expiresAt) {
+        this.shortcode = shortcode;
         this.originalUrl = originalUrl;
         this.createdAt = createdAt;
         this.expiresAt = expiresAt;
     }
 
     public String getShortCode() {
-        return shortCode;
+        return shortcode;
     }
 
     public String getOriginalUrl() {

@@ -27,6 +27,4 @@ public class UrlShortenerController {
         var response = new ShortenResponse("http://localhost:8082/" + responseUrl);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
-
 }
