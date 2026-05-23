@@ -1,4 +1,4 @@
-package pl.mariuszderda.urlshortener.model;
+package pl.gwsh.cleanupservice.model;
 
 
 import org.springframework.data.cassandra.core.mapping.Column;

@@ -6,6 +6,8 @@ import pl.mariuszderda.urlshortener.exception.UrlNotFoundException;
 import pl.mariuszderda.urlshortener.model.ShortenedUrl;
 import pl.mariuszderda.urlshortener.repository.UrlRepository;
 
+import java.time.LocalDateTime;
+
 import static java.time.LocalDateTime.now;
 
 @Service
@@ -23,13 +25,17 @@ public class UrlReadService {
         if (originalUrl.isEmpty()){
             throw new UrlNotFoundException("Url not found.");
         }
-
+        LocalDateTime lastUsed = now();
         ShortenedUrl url = originalUrl.get();
+
         if(url.getExpiresAt().isBefore(now())){
             throw new UrlExpiredException("Url time expires.");
         }
-        else {
-            return url.getOriginalUrl();
-        }
+
+        url.setLastUseDatColumn(lastUsed);
+        urlRepository.save(url);
+
+
+        return url.getOriginalUrl();
     }
 }
