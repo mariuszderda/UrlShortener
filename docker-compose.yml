@@ -121,6 +121,7 @@ services:
         cqlsh cassandra-1 9042 -e "CREATE KEYSPACE IF NOT EXISTS urlshortener WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};"
         echo "Keyspace urlshortener gotowy."
 
+
   read-service:
     build: ./readService/
     develop:
@@ -151,11 +152,15 @@ services:
     depends_on:
       cassandra-setup:
         condition: service_completed_successfully
+      kafka:
+        condition: service_healthy
     environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - CASSANDRA_CONTACT_POINTS=cassandra-1
       - CASSANDRA_PORT=9042
       - CASSANDRA_DATACENTER=my-datacenter-1
       - CASSANDRA_KEYSPACE=urlshortener
+
 
   cleanup-service:
     build: ./cleanupService
@@ -167,6 +172,40 @@ services:
     depends_on:
       cassandra-setup:
         condition: service_completed_successfully
+    networks:
+      - cassandra-net
+
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - cassandra-net
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  moderation-service:
+    build: ./moderationService/
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
     networks:
       - cassandra-net
 

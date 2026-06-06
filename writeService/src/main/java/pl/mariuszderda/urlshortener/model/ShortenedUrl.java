@@ -1,7 +1,6 @@
 package pl.mariuszderda.urlshortener.model;
 
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
@@ -9,15 +8,18 @@ import org.springframework.data.cassandra.core.mapping.Table;
 import java.time.LocalDateTime;
 
 @Table("urlshorten")
-public class ShortenedUrl{
-        @PrimaryKey
-        String shortcode;
-        @Column
-        String originalUrl;
-        @Column
-        LocalDateTime createdAt;
-        @Column
-        LocalDateTime expiresAt;
+public class ShortenedUrl {
+    @PrimaryKey
+    String shortcode;
+    @Column
+    String originalUrl;
+    @Column
+    LocalDateTime createdAt;
+    @Column
+    LocalDateTime expiresAt;
+
+    @Column("lastusedatcolumn")
+    LocalDateTime lastUseDatColumn;
 
     protected ShortenedUrl() {
     }
@@ -27,6 +29,7 @@ public class ShortenedUrl{
         this.originalUrl = originalUrl;
         this.createdAt = createdAt;
         this.expiresAt = expiresAt;
+        this.lastUseDatColumn = createdAt;
     }
 
     public String getShortCode() {
@@ -43,5 +46,13 @@ public class ShortenedUrl{
 
     public LocalDateTime getExpiresAt() {
         return expiresAt;
+    }
+
+    public LocalDateTime getLastUseDatColumn() {
+        return lastUseDatColumn;
+    }
+
+    public void setLastUseDatColumn(LocalDateTime lastUseDatColumn) {
+        this.lastUseDatColumn = lastUseDatColumn;
     }
 }

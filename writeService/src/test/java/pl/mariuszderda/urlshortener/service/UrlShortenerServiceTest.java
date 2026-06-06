@@ -26,10 +26,11 @@ class UrlShortenerServiceTest {
     private Base62Encoder base62Encoder;
 
     private UrlWriteService urlShortenerService;
+    private BannedWordCheckerService bannedWordCheckerService;
 
     @BeforeEach
     void setup() {
-        urlShortenerService = new UrlWriteService(urlRepository, base62Encoder, 60);
+        urlShortenerService = new UrlWriteService(urlRepository, base62Encoder, 60, bannedWordCheckerService);
     }
 
     @Test
