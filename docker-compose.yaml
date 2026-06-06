@@ -165,8 +165,8 @@ services:
       CASSANDRA_DATACENTER: my-datacenter-1
       CASSANDRA_KEYSPACE: urlshortener
     depends_on:
-      cassandra-1:
-        condition: service_healthy
+      cassandra-setup:
+        condition: service_completed_successfully
     networks:
       - cassandra-net
 
